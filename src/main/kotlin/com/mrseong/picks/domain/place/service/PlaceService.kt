@@ -41,7 +41,8 @@ class PlaceService(
             latitude = request.latitude,
             longitude = request.longitude,
             description = request.description,
-            imageUrl = request.imageUrl
+            imageUrl = request.imageUrl,
+            grade = request.grade
         )
         return PlaceResponse.from(placeRepository.save(place))
     }
@@ -58,6 +59,7 @@ class PlaceService(
         request.longitude?.let { place.longitude = it }
         request.description?.let { place.description = it }
         request.imageUrl?.let { place.imageUrl = it }
+        request.grade?.let { place.grade = it }
 
         return PlaceResponse.from(placeRepository.save(place))
     }
