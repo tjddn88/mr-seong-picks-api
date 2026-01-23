@@ -13,6 +13,7 @@ data class PlaceResponse(
     val longitude: Double,
     val description: String?,
     val imageUrl: String?,
+    val grade: Int?,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 ) {
@@ -26,6 +27,7 @@ data class PlaceResponse(
             longitude = place.longitude,
             description = place.description,
             imageUrl = place.imageUrl,
+            grade = place.grade,
             createdAt = place.createdAt,
             updatedAt = place.updatedAt
         )
@@ -41,6 +43,7 @@ data class PlaceDetailResponse(
     val longitude: Double,
     val description: String?,
     val imageUrl: String?,
+    val grade: Int?,
     val memos: List<MemoResponse>,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
@@ -55,6 +58,7 @@ data class PlaceDetailResponse(
             longitude = place.longitude,
             description = place.description,
             imageUrl = place.imageUrl,
+            grade = place.grade,
             memos = memos,
             createdAt = place.createdAt,
             updatedAt = place.updatedAt

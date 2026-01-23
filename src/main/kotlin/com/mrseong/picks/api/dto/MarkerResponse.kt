@@ -8,7 +8,8 @@ data class MarkerResponse(
     val name: String,
     val type: PlaceType,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val grade: Int?
 ) {
     companion object {
         fun from(place: Place) = MarkerResponse(
@@ -16,7 +17,8 @@ data class MarkerResponse(
             name = place.name,
             type = place.type,
             latitude = place.latitude,
-            longitude = place.longitude
+            longitude = place.longitude,
+            grade = place.grade
         )
     }
 }

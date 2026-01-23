@@ -22,7 +22,9 @@ data class PlaceCreateRequest(
 
     val description: String? = null,
 
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+
+    val grade: Int? = null
 )
 
 data class PlaceUpdateRequest(
@@ -32,5 +34,6 @@ data class PlaceUpdateRequest(
     val latitude: Double? = null,
     val longitude: Double? = null,
     val description: String? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val grade: Int? = null
 )
