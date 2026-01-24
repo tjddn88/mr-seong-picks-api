@@ -6,6 +6,7 @@ import com.mrseong.picks.domain.memo.repository.MemoRepository
 import com.mrseong.picks.domain.place.entity.Place
 import com.mrseong.picks.domain.place.entity.PlaceType
 import com.mrseong.picks.domain.place.repository.PlaceRepository
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -73,6 +74,7 @@ class PlaceService(
         placeRepository.deleteById(id)
     }
 
+    @Cacheable(value = ["markers"], key = "'markers:' + #type + ':' + #swLat + ':' + #swLng + ':' + #neLat + ':' + #neLng")
     fun getMarkers(
         type: PlaceType?,
         swLat: Double?,
