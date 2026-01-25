@@ -61,6 +61,9 @@ class PlaceService(
         request.description?.let { place.description = it }
         request.imageUrl?.let { place.imageUrl = it }
         request.grade?.let { place.grade = it }
+        request.googlePlaceId?.let { place.googlePlaceId = it }
+        request.googleRating?.let { place.googleRating = it }
+        request.googleRatingsTotal?.let { place.googleRatingsTotal = it }
 
         return PlaceResponse.from(placeRepository.save(place))
     }
