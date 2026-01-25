@@ -33,6 +33,11 @@ class Place(
     // 맛집 등급 (1=최고, 2=좋음, 3=보통) - 맛집에만 적용
     var grade: Int? = null,
 
+    // Google Places API 연동
+    var googlePlaceId: String? = null,
+    var googleRating: Double? = null,
+    var googleRatingsTotal: Int? = null,
+
     // 나중에 회원별 개인화를 위한 필드 (현재는 미사용)
     var userId: Long? = null,
 

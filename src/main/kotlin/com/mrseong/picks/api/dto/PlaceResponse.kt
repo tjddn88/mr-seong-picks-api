@@ -14,6 +14,9 @@ data class PlaceResponse(
     val description: String?,
     val imageUrl: String?,
     val grade: Int?,
+    val googlePlaceId: String?,
+    val googleRating: Double?,
+    val googleRatingsTotal: Int?,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 ) {
@@ -28,6 +31,9 @@ data class PlaceResponse(
             description = place.description,
             imageUrl = place.imageUrl,
             grade = place.grade,
+            googlePlaceId = place.googlePlaceId,
+            googleRating = place.googleRating,
+            googleRatingsTotal = place.googleRatingsTotal,
             createdAt = place.createdAt,
             updatedAt = place.updatedAt
         )
@@ -44,6 +50,9 @@ data class PlaceDetailResponse(
     val description: String?,
     val imageUrl: String?,
     val grade: Int?,
+    val googlePlaceId: String?,
+    val googleRating: Double?,
+    val googleRatingsTotal: Int?,
     val memos: List<MemoResponse>,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
@@ -59,6 +68,9 @@ data class PlaceDetailResponse(
             description = place.description,
             imageUrl = place.imageUrl,
             grade = place.grade,
+            googlePlaceId = place.googlePlaceId,
+            googleRating = place.googleRating,
+            googleRatingsTotal = place.googleRatingsTotal,
             memos = memos,
             createdAt = place.createdAt,
             updatedAt = place.updatedAt

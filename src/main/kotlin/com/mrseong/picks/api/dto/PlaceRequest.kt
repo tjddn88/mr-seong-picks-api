@@ -35,5 +35,8 @@ data class PlaceUpdateRequest(
     val longitude: Double? = null,
     val description: String? = null,
     val imageUrl: String? = null,
-    val grade: Int? = null
+    val grade: Int? = null,
+    val googlePlaceId: String? = null,
+    val googleRating: Double? = null,
+    val googleRatingsTotal: Int? = null
 )
