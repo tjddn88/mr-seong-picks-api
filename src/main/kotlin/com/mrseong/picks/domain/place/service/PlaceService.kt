@@ -1,6 +1,7 @@
 package com.mrseong.picks.domain.place.service
 
 import com.mrseong.picks.api.dto.*
+import com.mrseong.picks.common.exception.DuplicateException
 import com.mrseong.picks.common.exception.NotFoundException
 import com.mrseong.picks.domain.memo.repository.MemoRepository
 import com.mrseong.picks.domain.place.entity.Place
@@ -35,6 +36,11 @@ class PlaceService(
 
     @Transactional
     fun createPlace(request: PlaceCreateRequest): PlaceResponse {
+        // 주소 중복 체크
+        if (placeRepository.existsByAddress(request.address)) {
+            throw DuplicateException("이미 등록된 주소입니다: ${request.address}")
+        }
+
         val place = Place(
             name = request.name,
             type = request.type,

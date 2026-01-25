@@ -16,6 +16,12 @@ class GlobalExceptionHandler {
         return ApiResponse.error(e.message ?: "Not found")
     }
 
+    @ExceptionHandler(DuplicateException::class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    fun handleDuplicateException(e: DuplicateException): ApiResponse<Nothing> {
+        return ApiResponse.error(e.message ?: "Duplicate entry")
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleValidationException(e: MethodArgumentNotValidException): ApiResponse<Nothing> {
