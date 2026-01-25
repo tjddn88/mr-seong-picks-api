@@ -9,6 +9,8 @@ interface PlaceRepository : JpaRepository<Place, Long> {
 
     fun findByType(type: PlaceType): List<Place>
 
+    fun existsByAddress(address: String): Boolean
+
     @Query("""
         SELECT p FROM Place p
         WHERE p.latitude BETWEEN :swLat AND :neLat
