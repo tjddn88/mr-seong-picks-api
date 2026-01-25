@@ -70,11 +70,10 @@ class PlaceService(
 
     @Transactional
     fun deletePlace(id: Long) {
-        if (!placeRepository.existsById(id)) {
-            throw NotFoundException("Place not found: $id")
-        }
-        memoRepository.deleteByPlaceId(id)
-        placeRepository.deleteById(id)
+        val place = placeRepository.findById(id)
+            .orElseThrow { NotFoundException("Place not found: $id") }
+        // Soft Delete: @SQLDelete 어노테이션에 의해 deletedAt이 설정됨
+        placeRepository.delete(place)
     }
 
     @Cacheable(value = ["markers"], key = "'markers:' + #type + ':' + #swLat + ':' + #swLng + ':' + #neLat + ':' + #neLng")

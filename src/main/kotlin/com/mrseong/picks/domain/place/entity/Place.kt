@@ -1,10 +1,14 @@
 package com.mrseong.picks.domain.place.entity
 
 import jakarta.persistence.*
+import org.hibernate.annotations.SQLDelete
+import org.hibernate.annotations.SQLRestriction
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "places")
+@SQLDelete(sql = "UPDATE places SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 class Place(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +49,10 @@ class Place(
     val createdAt: LocalDateTime = LocalDateTime.now(),
 
     @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: LocalDateTime = LocalDateTime.now(),
+
+    // Soft Delete
+    var deletedAt: LocalDateTime? = null
 ) {
     @PreUpdate
     fun onUpdate() {
