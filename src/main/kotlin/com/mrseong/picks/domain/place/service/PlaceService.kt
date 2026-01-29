@@ -3,7 +3,6 @@ package com.mrseong.picks.domain.place.service
 import com.mrseong.picks.api.dto.*
 import com.mrseong.picks.common.exception.DuplicateException
 import com.mrseong.picks.common.exception.NotFoundException
-import com.mrseong.picks.domain.memo.repository.MemoRepository
 import com.mrseong.picks.domain.place.entity.Place
 import com.mrseong.picks.domain.place.entity.PlaceType
 import com.mrseong.picks.domain.place.repository.PlaceRepository
@@ -14,8 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional(readOnly = true)
 class PlaceService(
-    private val placeRepository: PlaceRepository,
-    private val memoRepository: MemoRepository
+    private val placeRepository: PlaceRepository
 ) {
 
     fun getAllPlaces(type: PlaceType?): List<PlaceResponse> {
@@ -30,8 +28,7 @@ class PlaceService(
     fun getPlace(id: Long): PlaceDetailResponse {
         val place = placeRepository.findById(id)
             .orElseThrow { NotFoundException("Place not found: $id") }
-        val memos = memoRepository.findByPlaceId(id).map { MemoResponse.from(it) }
-        return PlaceDetailResponse.from(place, memos)
+        return PlaceDetailResponse.from(place)
     }
 
     @Transactional
