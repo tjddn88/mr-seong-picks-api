@@ -53,12 +53,11 @@ data class PlaceDetailResponse(
     val googlePlaceId: String?,
     val googleRating: Double?,
     val googleRatingsTotal: Int?,
-    val memos: List<MemoResponse>,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 ) {
     companion object {
-        fun from(place: Place, memos: List<MemoResponse>) = PlaceDetailResponse(
+        fun from(place: Place) = PlaceDetailResponse(
             id = place.id,
             name = place.name,
             type = place.type,
@@ -71,7 +70,6 @@ data class PlaceDetailResponse(
             googlePlaceId = place.googlePlaceId,
             googleRating = place.googleRating,
             googleRatingsTotal = place.googleRatingsTotal,
-            memos = memos,
             createdAt = place.createdAt,
             updatedAt = place.updatedAt
         )
