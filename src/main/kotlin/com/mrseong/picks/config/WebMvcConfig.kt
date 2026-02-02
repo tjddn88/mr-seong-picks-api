@@ -11,7 +11,7 @@ class WebMvcConfig(
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(jwtInterceptor)
-            .addPathPatterns("/api/places/**")
+            .addPathPatterns("/api/places/**", "/api/map/markers/refresh")
             .excludePathPatterns("/api/auth/**")
     }
 }

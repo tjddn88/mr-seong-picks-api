@@ -5,6 +5,7 @@ import com.mrseong.picks.common.response.ApiResponse
 import com.mrseong.picks.domain.place.entity.PlaceType
 import com.mrseong.picks.domain.place.service.PlaceService
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -24,5 +25,11 @@ class MapController(
         @RequestParam(required = false) neLng: Double?
     ): ApiResponse<List<MarkerResponse>> {
         return ApiResponse.success(placeService.getMarkers(type, swLat, swLng, neLat, neLng))
+    }
+
+    @PostMapping("/markers/refresh")
+    fun refreshMarkers(): ApiResponse<List<MarkerResponse>> {
+        placeService.evictMarkersCache()
+        return ApiResponse.success(placeService.getMarkers(null, null, null, null, null))
     }
 }

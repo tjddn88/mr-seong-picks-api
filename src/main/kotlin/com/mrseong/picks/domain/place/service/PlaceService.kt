@@ -6,6 +6,7 @@ import com.mrseong.picks.common.exception.NotFoundException
 import com.mrseong.picks.domain.place.entity.Place
 import com.mrseong.picks.domain.place.entity.PlaceType
 import com.mrseong.picks.domain.place.repository.PlaceRepository
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -77,6 +78,11 @@ class PlaceService(
             .orElseThrow { NotFoundException("Place not found: $id") }
         // Soft Delete: @SQLDelete 어노테이션에 의해 deletedAt이 설정됨
         placeRepository.delete(place)
+    }
+
+    @CacheEvict(value = ["markers"], allEntries = true)
+    fun evictMarkersCache() {
+        // 캐시만 비움
     }
 
     @Cacheable(value = ["markers"], key = "'markers:' + #type + ':' + #swLat + ':' + #swLng + ':' + #neLat + ':' + #neLng")
