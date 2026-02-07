@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
+    private val logger = org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundException(e: NotFoundException): ApiResponse<Nothing> {
@@ -45,6 +47,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleException(e: Exception): ApiResponse<Nothing> {
-        return ApiResponse.error(e.message ?: "Internal server error")
+        logger.error("Unexpected error occurred", e)
+        return ApiResponse.error("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
     }
 }

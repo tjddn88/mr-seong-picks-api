@@ -32,8 +32,8 @@ class CorsConfig {
                 "http://127.0.0.1:3000",
                 "http://13.209.77.227",
                 "http://13.209.77.227:3000",
-                "https://ourspots.life",
-                "http://ourspots.life"
+                "https://ourspots.life"
+                // HTTP는 HTTPS로 리다이렉트되므로 제거
             )
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")

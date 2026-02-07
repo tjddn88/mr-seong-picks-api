@@ -13,6 +13,16 @@ class JwtProvider(
     @Value("\${app.jwt.secret:}") private val secret: String,
     @Value("\${app.jwt.expiration-hours:24}") private val expirationHours: Long
 ) {
+    companion object {
+        private const val MIN_SECRET_LENGTH = 32
+    }
+
+    init {
+        require(secret.length >= MIN_SECRET_LENGTH) {
+            "JWT secret must be at least $MIN_SECRET_LENGTH characters long"
+        }
+    }
+
     private val key: SecretKey by lazy {
         Keys.hmacShaKeyFor(secret.toByteArray())
     }
