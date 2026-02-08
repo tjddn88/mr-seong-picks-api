@@ -1,1 +1,1 @@
-# mr-seong-picks-api
+# our-spots-api

@@ -1,1 +1,1 @@
-rootProject.name = "mr-seong-picks-api"
+rootProject.name = "our-spots-api"
