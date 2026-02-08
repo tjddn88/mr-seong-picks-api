@@ -37,6 +37,3 @@ data class PlaceResponse(
         )
     }
 }
-
-// PlaceDetailResponse는 PlaceResponse와 동일하여 typealias로 대체
-typealias PlaceDetailResponse = PlaceResponse
