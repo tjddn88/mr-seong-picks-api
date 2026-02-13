@@ -6,5 +6,9 @@ enum class PlaceType {
     RELAXATION,              // 아빠의 쉼터
     MY_FOOTPRINT,            // 나의 발자취
     RECOMMENDED_RESTAURANT,  // 추천 맛집
-    RECOMMENDED_SPOT         // 추천 명소
+    RECOMMENDED_SPOT;        // 추천 명소
+
+    companion object {
+        val PERSONAL_TYPES = listOf(MY_FOOTPRINT, RECOMMENDED_RESTAURANT, RECOMMENDED_SPOT)
+    }
 }

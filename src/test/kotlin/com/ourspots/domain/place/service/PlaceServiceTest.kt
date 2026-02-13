@@ -46,7 +46,7 @@ class PlaceServiceTest {
             every { placeRepository.findAll() } returns places
 
             // when
-            val result = placeService.getAllPlaces(null)
+            val result = placeService.getAllPlaces(null, true)
 
             // then
             assertEquals(2, result.size)
@@ -63,7 +63,7 @@ class PlaceServiceTest {
             every { placeRepository.findByType(PlaceType.RESTAURANT) } returns restaurants
 
             // when
-            val result = placeService.getAllPlaces(PlaceType.RESTAURANT)
+            val result = placeService.getAllPlaces(PlaceType.RESTAURANT, true)
 
             // then
             assertEquals(2, result.size)
@@ -83,7 +83,7 @@ class PlaceServiceTest {
             every { placeRepository.findById(1L) } returns Optional.of(place)
 
             // when
-            val result = placeService.getPlace(1L)
+            val result = placeService.getPlace(1L, true)
 
             // then
             assertEquals("맛집1", result.name)
@@ -97,7 +97,7 @@ class PlaceServiceTest {
 
             // when & then
             assertThrows<NotFoundException> {
-                placeService.getPlace(999L)
+                placeService.getPlace(999L, true)
             }
         }
     }
@@ -276,7 +276,7 @@ class PlaceServiceTest {
             every { placeRepository.findAll() } returns places
 
             // when
-            val result = placeService.getMarkers(null, null, null, null, null)
+            val result = placeService.getMarkers(null, null, null, null, null, true)
 
             // then
             assertEquals(2, result.size)
@@ -289,7 +289,7 @@ class PlaceServiceTest {
             every { placeRepository.findByType(PlaceType.RESTAURANT) } returns restaurants
 
             // when
-            val result = placeService.getMarkers(PlaceType.RESTAURANT, null, null, null, null)
+            val result = placeService.getMarkers(PlaceType.RESTAURANT, null, null, null, null, true)
 
             // then
             assertEquals(1, result.size)
@@ -302,7 +302,7 @@ class PlaceServiceTest {
             every { placeRepository.findWithinBounds(37.0, 126.0, 38.0, 128.0) } returns places
 
             // when
-            val result = placeService.getMarkers(null, 37.0, 126.0, 38.0, 128.0)
+            val result = placeService.getMarkers(null, 37.0, 126.0, 38.0, 128.0, true)
 
             // then
             assertEquals(1, result.size)
@@ -318,7 +318,7 @@ class PlaceServiceTest {
             } returns restaurants
 
             // when
-            val result = placeService.getMarkers(PlaceType.RESTAURANT, 37.0, 126.0, 38.0, 128.0)
+            val result = placeService.getMarkers(PlaceType.RESTAURANT, 37.0, 126.0, 38.0, 128.0, true)
 
             // then
             assertEquals(1, result.size)

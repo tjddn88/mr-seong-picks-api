@@ -2,10 +2,12 @@ package com.ourspots.api.controller
 
 import com.ourspots.api.dto.MarkerResponse
 import com.ourspots.common.response.ApiResponse
+import com.ourspots.domain.auth.service.JwtProvider
 import com.ourspots.domain.place.entity.PlaceType
 import com.ourspots.domain.place.service.PlaceService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -13,7 +15,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/map")
 class MapController(
-    private val placeService: PlaceService
+    private val placeService: PlaceService,
+    private val jwtProvider: JwtProvider
 ) {
 
     @GetMapping("/markers")
@@ -22,14 +25,21 @@ class MapController(
         @RequestParam(required = false) swLat: Double?,
         @RequestParam(required = false) swLng: Double?,
         @RequestParam(required = false) neLat: Double?,
-        @RequestParam(required = false) neLng: Double?
+        @RequestParam(required = false) neLng: Double?,
+        @RequestHeader("Authorization", required = false) authHeader: String?
     ): ApiResponse<List<MarkerResponse>> {
-        return ApiResponse.success(placeService.getMarkers(type, swLat, swLng, neLat, neLng))
+        val authenticated = isAuthenticated(authHeader)
+        return ApiResponse.success(placeService.getMarkers(type, swLat, swLng, neLat, neLng, authenticated))
     }
 
     @PostMapping("/markers/refresh")
     fun refreshMarkers(): ApiResponse<List<MarkerResponse>> {
         placeService.evictMarkersCache()
-        return ApiResponse.success(placeService.getMarkers(null, null, null, null, null))
+        return ApiResponse.success(placeService.getMarkers(null, null, null, null, null, true))
+    }
+
+    private fun isAuthenticated(authHeader: String?): Boolean {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) return false
+        return jwtProvider.validateToken(authHeader.substring(7))
     }
 }

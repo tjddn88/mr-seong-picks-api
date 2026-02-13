@@ -2,6 +2,7 @@ package com.ourspots.domain.place.controller
 
 import com.ourspots.api.dto.*
 import com.ourspots.common.response.ApiResponse
+import com.ourspots.domain.auth.service.JwtProvider
 import com.ourspots.domain.place.entity.PlaceType
 import com.ourspots.domain.place.service.PlaceService
 import jakarta.validation.Valid
@@ -11,19 +12,26 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/places")
 class PlaceController(
-    private val placeService: PlaceService
+    private val placeService: PlaceService,
+    private val jwtProvider: JwtProvider
 ) {
 
     @GetMapping
     fun getAllPlaces(
-        @RequestParam(required = false) type: PlaceType?
+        @RequestParam(required = false) type: PlaceType?,
+        @RequestHeader("Authorization", required = false) authHeader: String?
     ): ApiResponse<List<PlaceResponse>> {
-        return ApiResponse.success(placeService.getAllPlaces(type))
+        val authenticated = isAuthenticated(authHeader)
+        return ApiResponse.success(placeService.getAllPlaces(type, authenticated))
     }
 
     @GetMapping("/{id}")
-    fun getPlace(@PathVariable id: Long): ApiResponse<PlaceResponse> {
-        return ApiResponse.success(placeService.getPlace(id))
+    fun getPlace(
+        @PathVariable id: Long,
+        @RequestHeader("Authorization", required = false) authHeader: String?
+    ): ApiResponse<PlaceResponse> {
+        val authenticated = isAuthenticated(authHeader)
+        return ApiResponse.success(placeService.getPlace(id, authenticated))
     }
 
     @PostMapping
@@ -46,5 +54,10 @@ class PlaceController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deletePlace(@PathVariable id: Long) {
         placeService.deletePlace(id)
+    }
+
+    private fun isAuthenticated(authHeader: String?): Boolean {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) return false
+        return jwtProvider.validateToken(authHeader.substring(7))
     }
 }

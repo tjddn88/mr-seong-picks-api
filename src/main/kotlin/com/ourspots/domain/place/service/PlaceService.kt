@@ -17,18 +17,23 @@ class PlaceService(
     private val placeRepository: PlaceRepository
 ) {
 
-    fun getAllPlaces(type: PlaceType?): List<PlaceResponse> {
+    fun getAllPlaces(type: PlaceType?, authenticated: Boolean): List<PlaceResponse> {
         val places = if (type != null) {
+            if (!authenticated && type in PlaceType.PERSONAL_TYPES) return emptyList()
             placeRepository.findByType(type)
         } else {
-            placeRepository.findAll()
+            if (authenticated) placeRepository.findAll()
+            else placeRepository.findByTypeNotIn(PlaceType.PERSONAL_TYPES)
         }
         return places.map { PlaceResponse.from(it) }
     }
 
-    fun getPlace(id: Long): PlaceResponse {
+    fun getPlace(id: Long, authenticated: Boolean): PlaceResponse {
         val place = placeRepository.findById(id)
             .orElseThrow { NotFoundException("Place not found: $id") }
+        if (!authenticated && place.type in PlaceType.PERSONAL_TYPES) {
+            throw NotFoundException("Place not found: $id")
+        }
         return PlaceResponse.from(place)
     }
 
@@ -83,24 +88,30 @@ class PlaceService(
         // 캐시만 비움
     }
 
-    @Cacheable(value = ["markers"], key = "'markers:' + #type + ':' + #swLat + ':' + #swLng + ':' + #neLat + ':' + #neLng")
+    @Cacheable(value = ["markers"], key = "'markers:' + #type + ':' + #swLat + ':' + #swLng + ':' + #neLat + ':' + #neLng + ':' + #authenticated")
     fun getMarkers(
         type: PlaceType?,
         swLat: Double?,
         swLng: Double?,
         neLat: Double?,
-        neLng: Double?
+        neLng: Double?,
+        authenticated: Boolean
     ): List<MarkerResponse> {
+        if (type != null && !authenticated && type in PlaceType.PERSONAL_TYPES) {
+            return emptyList()
+        }
+
         val places = when {
             swLat != null && swLng != null && neLat != null && neLng != null -> {
-                if (type != null) {
-                    placeRepository.findByTypeWithinBounds(type, swLat, swLng, neLat, neLng)
-                } else {
-                    placeRepository.findWithinBounds(swLat, swLng, neLat, neLng)
+                when {
+                    type != null -> placeRepository.findByTypeWithinBounds(type, swLat, swLng, neLat, neLng)
+                    authenticated -> placeRepository.findWithinBounds(swLat, swLng, neLat, neLng)
+                    else -> placeRepository.findWithinBoundsExcludingTypes(PlaceType.PERSONAL_TYPES, swLat, swLng, neLat, neLng)
                 }
             }
             type != null -> placeRepository.findByType(type)
-            else -> placeRepository.findAll()
+            authenticated -> placeRepository.findAll()
+            else -> placeRepository.findByTypeNotIn(PlaceType.PERSONAL_TYPES)
         }
         return places.map { MarkerResponse.from(it) }
     }

@@ -10,6 +10,8 @@ interface PlaceRepository : JpaRepository<Place, Long> {
 
     fun findByType(type: PlaceType): List<Place>
 
+    fun findByTypeNotIn(types: List<PlaceType>): List<Place>
+
     fun existsByNameAndAddress(name: String, address: String): Boolean
 
     @Query("""
@@ -18,6 +20,20 @@ interface PlaceRepository : JpaRepository<Place, Long> {
         AND p.longitude BETWEEN :swLng AND :neLng
     """)
     fun findWithinBounds(swLat: Double, swLng: Double, neLat: Double, neLng: Double): List<Place>
+
+    @Query("""
+        SELECT p FROM Place p
+        WHERE p.type NOT IN :excludedTypes
+        AND p.latitude BETWEEN :swLat AND :neLat
+        AND p.longitude BETWEEN :swLng AND :neLng
+    """)
+    fun findWithinBoundsExcludingTypes(
+        excludedTypes: List<PlaceType>,
+        swLat: Double,
+        swLng: Double,
+        neLat: Double,
+        neLng: Double
+    ): List<Place>
 
     @Query("""
         SELECT p FROM Place p
@@ -46,4 +62,7 @@ interface PlaceRepository : JpaRepository<Place, Long> {
         maxFailCount: Int,
         cutoffDate: LocalDateTime
     ): List<Place>
+
+    @Query("SELECT * FROM places ORDER BY id", nativeQuery = true)
+    fun findAllIncludingDeleted(): List<Place>
 }
