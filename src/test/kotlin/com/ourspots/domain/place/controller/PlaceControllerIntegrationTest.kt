@@ -155,6 +155,45 @@ class PlaceControllerIntegrationTest {
         }
 
         @Test
+        fun createPlace_whenLatitudeOutOfRange_shouldReturn400() {
+            val request = PlaceCreateRequest(
+                name = "맛집",
+                type = PlaceType.RESTAURANT,
+                address = "서울시 강남구",
+                latitude = 91.0,
+                longitude = 127.0
+            )
+
+            mockMvc.perform(
+                post("/api/places")
+                    .header("Authorization", "Bearer $authToken")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+                .andExpect(status().isBadRequest)
+        }
+
+        @Test
+        fun createPlace_whenGradeOutOfRange_shouldReturn400() {
+            val request = PlaceCreateRequest(
+                name = "맛집",
+                type = PlaceType.RESTAURANT,
+                address = "서울시 강남구",
+                latitude = 37.5,
+                longitude = 127.0,
+                grade = 5
+            )
+
+            mockMvc.perform(
+                post("/api/places")
+                    .header("Authorization", "Bearer $authToken")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+                .andExpect(status().isBadRequest)
+        }
+
+        @Test
         fun createPlace_whenDuplicateNameAndAddress_shouldReturn409() {
             // given
             createTestPlace("기존 맛집", PlaceType.RESTAURANT, "서울시 강남구")
@@ -197,6 +236,34 @@ class PlaceControllerIntegrationTest {
             )
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.data.name").value("수정된 맛집"))
+        }
+
+        @Test
+        fun updatePlace_whenEmptyName_shouldReturn400() {
+            val place = createTestPlace("맛집", PlaceType.RESTAURANT)
+            val request = PlaceUpdateRequest(name = "")
+
+            mockMvc.perform(
+                put("/api/places/${place.id}")
+                    .header("Authorization", "Bearer $authToken")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+                .andExpect(status().isBadRequest)
+        }
+
+        @Test
+        fun updatePlace_whenLatitudeOutOfRange_shouldReturn400() {
+            val place = createTestPlace("맛집", PlaceType.RESTAURANT)
+            val request = PlaceUpdateRequest(latitude = -91.0)
+
+            mockMvc.perform(
+                put("/api/places/${place.id}")
+                    .header("Authorization", "Bearer $authToken")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+                .andExpect(status().isBadRequest)
         }
 
         @Test

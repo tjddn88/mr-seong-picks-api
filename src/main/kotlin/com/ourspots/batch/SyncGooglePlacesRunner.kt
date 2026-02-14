@@ -7,9 +7,12 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
+import org.springframework.data.domain.PageRequest
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.net.URLEncoder
+import java.time.Duration
 import java.time.LocalDateTime
 
 @Component
@@ -21,7 +24,12 @@ class SyncGooglePlacesRunner(
 ) : ApplicationRunner {
 
     private val log = LoggerFactory.getLogger(javaClass)
-    private val restTemplate = RestTemplate()
+    private val restTemplate = RestTemplate().apply {
+        requestFactory = SimpleClientHttpRequestFactory().apply {
+            setConnectTimeout(Duration.ofSeconds(5))
+            setReadTimeout(Duration.ofSeconds(10))
+        }
+    }
 
     companion object {
         private const val GOOGLE_FIND_PLACE_URL = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
@@ -44,12 +52,11 @@ class SyncGooglePlacesRunner(
         log.info("처리 제한: ${limit}개")
 
         val cutoffDate = LocalDateTime.now().minusMonths(REFRESH_MONTHS)
-        val allPlaces = placeRepository.findPlacesEligibleForGoogleSync(MAX_FAIL_COUNT, cutoffDate)
-        val places = allPlaces.take(limit)
+        val places = placeRepository.findPlacesEligibleForGoogleSync(MAX_FAIL_COUNT, cutoffDate, PageRequest.of(0, limit))
 
         val newCount = places.count { it.googleRating == null }
         val renewalCount = places.size - newCount
-        log.info("총 ${allPlaces.size}개 대상 중 ${places.size}개 처리 예정 (신규: ${newCount}, 갱신: ${renewalCount})")
+        log.info("${places.size}개 처리 예정 (신규: ${newCount}, 갱신: ${renewalCount})")
 
         if (places.isEmpty()) {
             log.info("동기화 대상 장소가 없습니다.")

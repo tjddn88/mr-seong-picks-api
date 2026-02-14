@@ -2,6 +2,7 @@ package com.ourspots.domain.place.repository
 
 import com.ourspots.domain.place.entity.Place
 import com.ourspots.domain.place.entity.PlaceType
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
@@ -60,7 +61,8 @@ interface PlaceRepository : JpaRepository<Place, Long> {
     """)
     fun findPlacesEligibleForGoogleSync(
         maxFailCount: Int,
-        cutoffDate: LocalDateTime
+        cutoffDate: LocalDateTime,
+        pageable: Pageable
     ): List<Place>
 
     @Query("SELECT * FROM places ORDER BY id", nativeQuery = true)

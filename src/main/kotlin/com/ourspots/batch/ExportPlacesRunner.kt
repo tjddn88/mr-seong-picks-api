@@ -71,10 +71,15 @@ class ExportPlacesRunner(
     }
 
     private fun escapeCsv(value: String): String {
-        return if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+        val escaped = if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
             "\"${value.replace("\"", "\"\"")}\""
         } else {
             value
+        }
+        return if (escaped.isNotEmpty() && escaped[0] in listOf('=', '+', '@', '-')) {
+            "'$escaped"
+        } else {
+            escaped
         }
     }
 }

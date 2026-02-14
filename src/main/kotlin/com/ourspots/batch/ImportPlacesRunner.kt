@@ -11,12 +11,15 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.io.File
+import java.time.Duration
 
 @Component
 @Profile("batch")
@@ -27,7 +30,12 @@ class ImportPlacesRunner(
 ) : ApplicationRunner {
 
     private val log = LoggerFactory.getLogger(javaClass)
-    private val restTemplate = RestTemplate()
+    private val restTemplate = RestTemplate().apply {
+        requestFactory = SimpleClientHttpRequestFactory().apply {
+            setConnectTimeout(Duration.ofSeconds(5))
+            setReadTimeout(Duration.ofSeconds(10))
+        }
+    }
 
     companion object {
         private const val KAKAO_ADDRESS_URL = "https://dapi.kakao.com/v2/local/search/address.json?query={query}"
@@ -113,6 +121,9 @@ class ImportPlacesRunner(
                 success++
 
                 Thread.sleep(API_DELAY_MS)
+            } catch (e: DataIntegrityViolationException) {
+                log.warn("  [SKIP] 중복 감지: $name ($address)")
+                skipped++
             } catch (e: Exception) {
                 log.error("  에러: ${e.message}")
                 failed++

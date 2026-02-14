@@ -42,13 +42,6 @@ class Place(
     var googleRatingFailCount: Int = 0,
     var googleRatingUpdatedAt: LocalDateTime? = null,
 
-    // === 미사용 필드 (DB 스키마 호환성을 위해 유지) ===
-    @Deprecated("미사용 필드 - 프론트엔드에서 이미지 기능 제거됨")
-    var imageUrl: String? = null,
-
-    @Deprecated("미사용 필드 - 회원 기능 미구현")
-    var userId: Long? = null,
-
     @Column(nullable = false, updatable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
 

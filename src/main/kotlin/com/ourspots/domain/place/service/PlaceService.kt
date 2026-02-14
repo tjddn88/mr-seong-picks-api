@@ -88,7 +88,7 @@ class PlaceService(
         // 캐시만 비움
     }
 
-    @Cacheable(value = ["markers"], key = "'markers:' + #type + ':' + #swLat + ':' + #swLng + ':' + #neLat + ':' + #neLng + ':' + #authenticated")
+    @Cacheable(value = ["markers"], key = "'markers:' + (#type != null ? #type.name() : 'ALL') + ':' + (#swLat ?: '_') + ':' + (#swLng ?: '_') + ':' + (#neLat ?: '_') + ':' + (#neLng ?: '_') + ':' + #authenticated")
     fun getMarkers(
         type: PlaceType?,
         swLat: Double?,

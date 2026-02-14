@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import org.springframework.data.domain.PageRequest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
@@ -187,7 +188,7 @@ class PlaceRepositoryTest {
             createPlace("신규 맛집", PlaceType.RESTAURANT)
 
             // when
-            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate)
+            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate, PageRequest.of(0, 100))
 
             // then
             assertEquals(1, result.size)
@@ -200,7 +201,7 @@ class PlaceRepositoryTest {
             createPlace("실패 맛집", PlaceType.RESTAURANT, googleRatingFailCount = 3)
 
             // when
-            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate)
+            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate, PageRequest.of(0, 100))
 
             // then
             assertEquals(0, result.size)
@@ -216,7 +217,7 @@ class PlaceRepositoryTest {
             )
 
             // when
-            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate)
+            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate, PageRequest.of(0, 100))
 
             // then
             assertEquals(1, result.size)
@@ -233,7 +234,7 @@ class PlaceRepositoryTest {
             )
 
             // when
-            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate)
+            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate, PageRequest.of(0, 100))
 
             // then
             assertEquals(0, result.size)
@@ -249,7 +250,7 @@ class PlaceRepositoryTest {
             )
 
             // when
-            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate)
+            val result = placeRepository.findPlacesEligibleForGoogleSync(maxFailCount, cutoffDate, PageRequest.of(0, 100))
 
             // then
             assertEquals(1, result.size)
