@@ -25,8 +25,8 @@
 ## 주요 기능
 
 - 장소 CRUD (맛집, 아이 놀이터, 아빠의 시간, 나의 발자취, 추천 맛집, 추천 명소)
-- 지도 마커 API (바운딩 박스 영역 조회, Caffeine 캐시 12시간 TTL)
-- JWT 관리자 인증 (24시간 토큰, IP 기반 Rate Limiting)
+- 지도 마커 API (바운딩 박스 영역 조회, Caffeine 캐시)
+- JWT 관리자 인증 (IP 기반 Rate Limiting)
 - 개인 카테고리 서버측 필터링 (미인증 시 공개 타입만 응답)
 - Soft Delete (삭제 시 `deletedAt` 기록, 조회 시 자동 제외)
 - 배치: 엑셀 장소 일괄 등록, Google Places 평점 동기화, DB 백업(CSV)
@@ -90,6 +90,71 @@ src/main/kotlin/com/ourspots/
 │   └── place/     # 장소 CRUD
 ├── common/        # 예외 처리, 응답 래퍼
 └── config/        # CORS, Cache, JWT 인터셉터
+```
+
+## 앱 플로우
+
+### 초기 로딩 → 마커 표시
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant N as Nginx (HTTPS)
+    participant W as Next.js
+    participant A as Spring Boot
+    participant D as Database
+
+    B->>N: GET https://ourspots.life
+    N->>W: proxy
+    W-->>B: 페이지 렌더링
+
+    B->>N: GET /api/map/markers
+    N->>A: proxy
+
+    alt Cache HIT
+        A-->>N: 캐시된 마커 데이터
+    else Cache MISS
+        A->>D: SELECT (활성 장소)
+        D-->>A: places 목록
+        A->>A: 캐시 저장
+    end
+
+    A-->>B: ApiResponse { markers }
+    Note over B: 미인증 → 공개 카테고리만 표시
+    B->>B: 카카오맵 마커 렌더링
+```
+
+### 장소 검색 → 등록
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant K as Kakao Maps SDK
+    participant N as Nginx (HTTPS)
+    participant A as Spring Boot
+    participant D as Database
+
+    B->>K: keywordSearch(keyword, 현재 지도 범위)
+    K-->>B: 검색 결과
+
+    B->>B: 검색 결과 패널 + 검색 마커 표시
+    B->>B: 결과 클릭 → 지도 이동 + 미리보기 카드
+    B->>B: "등록" 클릭 → PlaceForm 작성
+
+    B->>N: POST /api/places (JWT 인증)
+    N->>A: proxy
+
+    A->>A: 토큰 검증
+    A->>D: 이름+주소 중복 체크
+
+    alt 중복
+        A-->>B: 409 Conflict
+    else 신규
+        A->>D: INSERT place
+        A-->>B: 201 Created
+    end
+
+    B->>B: 새 마커 즉시 표시
 ```
 
 ## 관련 프로젝트
