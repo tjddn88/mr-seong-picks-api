@@ -21,7 +21,7 @@ class PlaceController(
         @RequestParam(required = false) type: PlaceType?,
         @RequestHeader("Authorization", required = false) authHeader: String?
     ): ApiResponse<List<PlaceResponse>> {
-        val authenticated = isAuthenticated(authHeader)
+        val authenticated = jwtProvider.isValidAuthHeader(authHeader)
         return ApiResponse.success(placeService.getAllPlaces(type, authenticated))
     }
 
@@ -30,7 +30,7 @@ class PlaceController(
         @PathVariable id: Long,
         @RequestHeader("Authorization", required = false) authHeader: String?
     ): ApiResponse<PlaceResponse> {
-        val authenticated = isAuthenticated(authHeader)
+        val authenticated = jwtProvider.isValidAuthHeader(authHeader)
         return ApiResponse.success(placeService.getPlace(id, authenticated))
     }
 
@@ -56,8 +56,4 @@ class PlaceController(
         placeService.deletePlace(id)
     }
 
-    private fun isAuthenticated(authHeader: String?): Boolean {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) return false
-        return jwtProvider.validateToken(authHeader.substring(7))
-    }
 }

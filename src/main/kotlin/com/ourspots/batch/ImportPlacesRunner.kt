@@ -129,37 +129,35 @@ class ImportPlacesRunner(
     private fun readExcel(file: File): List<Map<String, String>> {
         val workbook = WorkbookFactory.create(file)
         val sheet = workbook.getSheetAt(0)
-        val rows = mutableListOf<Map<String, String>>()
 
-        val headerRow = sheet.getRow(0) ?: return rows
+        val headerRow = sheet.getRow(0) ?: return emptyList()
         val headers = (0 until headerRow.lastCellNum).map { i ->
             headerRow.getCell(i)?.stringCellValue?.trim() ?: ""
         }
 
-        for (i in 1..sheet.lastRowNum) {
-            val row = sheet.getRow(i) ?: continue
-            val map = mutableMapOf<String, String>()
-            for ((j, header) in headers.withIndex()) {
-                if (header.isBlank()) continue
-                val cell = row.getCell(j)
-                val value = when (cell?.cellType) {
-                    CellType.STRING -> cell.stringCellValue
-                    CellType.NUMERIC -> {
-                        val num = cell.numericCellValue
-                        if (num == num.toLong().toDouble()) num.toLong().toString() else num.toString()
-                    }
-                    CellType.BOOLEAN -> cell.booleanCellValue.toString()
-                    else -> ""
-                }
-                map[header] = value
-            }
-            if (map.values.any { it.isNotBlank() }) {
-                rows.add(map)
-            }
+        val rows = (1..sheet.lastRowNum).mapNotNull { i ->
+            val row = sheet.getRow(i) ?: return@mapNotNull null
+            val map = headers.withIndex()
+                .filter { (_, header) -> header.isNotBlank() }
+                .associate { (j, header) -> header to extractCellValue(row.getCell(j)) }
+            map.takeIf { it.values.any { v -> v.isNotBlank() } }
         }
 
         workbook.close()
         return rows
+    }
+
+    private fun extractCellValue(cell: org.apache.poi.ss.usermodel.Cell?): String {
+        if (cell == null) return ""
+        return when (cell.cellType) {
+            CellType.STRING -> cell.stringCellValue
+            CellType.NUMERIC -> {
+                val num = cell.numericCellValue
+                if (num == num.toLong().toDouble()) num.toLong().toString() else num.toString()
+            }
+            CellType.BOOLEAN -> cell.booleanCellValue.toString()
+            else -> ""
+        }
     }
 
     private fun getCoordinates(address: String, name: String): Pair<Double, Double>? {
@@ -180,7 +178,9 @@ class ImportPlacesRunner(
             val documents = response.body?.get("documents") as? List<Map<String, Any>>
             if (!documents.isNullOrEmpty()) {
                 val doc = documents[0]
-                Pair((doc["y"] as String).toDouble(), (doc["x"] as String).toDouble())
+                val lat = (doc["y"] as? String)?.toDoubleOrNull() ?: return null
+                val lng = (doc["x"] as? String)?.toDoubleOrNull() ?: return null
+                Pair(lat, lng)
             } else null
         } catch (e: Exception) {
             log.debug("카카오 검색 실패 ($url): ${e.message}")

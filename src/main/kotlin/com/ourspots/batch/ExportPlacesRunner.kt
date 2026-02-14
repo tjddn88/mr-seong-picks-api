@@ -43,29 +43,27 @@ class ExportPlacesRunner(
         log.info("총 ${places.size}개 장소 (삭제 포함)")
 
         outputFile.bufferedWriter().use { writer ->
-            writer.write(CSV_HEADER)
-            writer.newLine()
+            writer.appendLine(CSV_HEADER)
 
-            for (place in places) {
-                val line = listOf(
-                    place.id.toString(),
-                    escapeCsv(place.name),
-                    place.type.name,
-                    escapeCsv(place.address),
-                    place.latitude.toString(),
-                    place.longitude.toString(),
-                    escapeCsv(place.description ?: ""),
-                    place.grade?.toString() ?: "",
-                    place.googlePlaceId ?: "",
-                    place.googleRating?.toString() ?: "",
-                    place.googleRatingsTotal?.toString() ?: "",
-                    place.createdAt.toString(),
-                    place.updatedAt.toString(),
-                    place.deletedAt?.toString() ?: ""
-                ).joinToString(",")
-
-                writer.write(line)
-                writer.newLine()
+            places.forEach { place ->
+                writer.appendLine(
+                    listOf(
+                        place.id.toString(),
+                        escapeCsv(place.name),
+                        place.type.name,
+                        escapeCsv(place.address),
+                        place.latitude.toString(),
+                        place.longitude.toString(),
+                        escapeCsv(place.description ?: ""),
+                        place.grade?.toString() ?: "",
+                        place.googlePlaceId ?: "",
+                        place.googleRating?.toString() ?: "",
+                        place.googleRatingsTotal?.toString() ?: "",
+                        place.createdAt.toString(),
+                        place.updatedAt.toString(),
+                        place.deletedAt?.toString() ?: ""
+                    ).joinToString(",")
+                )
             }
         }
 

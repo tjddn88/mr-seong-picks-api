@@ -52,4 +52,9 @@ class JwtProvider(
             false
         }
     }
+
+    fun isValidAuthHeader(authHeader: String?): Boolean {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) return false
+        return validateToken(authHeader.substring(7))
+    }
 }

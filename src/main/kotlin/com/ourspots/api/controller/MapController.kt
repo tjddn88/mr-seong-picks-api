@@ -28,7 +28,7 @@ class MapController(
         @RequestParam(required = false) neLng: Double?,
         @RequestHeader("Authorization", required = false) authHeader: String?
     ): ApiResponse<List<MarkerResponse>> {
-        val authenticated = isAuthenticated(authHeader)
+        val authenticated = jwtProvider.isValidAuthHeader(authHeader)
         return ApiResponse.success(placeService.getMarkers(type, swLat, swLng, neLat, neLng, authenticated))
     }
 
@@ -38,8 +38,4 @@ class MapController(
         return ApiResponse.success(placeService.getMarkers(null, null, null, null, null, true))
     }
 
-    private fun isAuthenticated(authHeader: String?): Boolean {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) return false
-        return jwtProvider.validateToken(authHeader.substring(7))
-    }
 }
