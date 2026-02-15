@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import org.hibernate.annotations.SQLDelete
 import org.hibernate.annotations.SQLRestriction
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Entity
 @Table(name = "guestbook_messages")
@@ -24,7 +25,7 @@ class GuestbookMessage(
     var ipAddress: String,
 
     @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC),
 
     var deletedAt: LocalDateTime? = null
 )

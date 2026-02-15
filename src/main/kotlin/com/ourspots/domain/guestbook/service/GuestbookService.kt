@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
@@ -77,7 +78,7 @@ class GuestbookService(
     }
 
     private fun checkDailyLimits(clientIp: String) {
-        val startOfDay = LocalDate.now().atStartOfDay()
+        val startOfDay = LocalDate.now(ZoneOffset.UTC).atStartOfDay()
 
         val ipCount = guestbookRepository.countByIpAddressAndCreatedAtAfter(clientIp, startOfDay)
         if (ipCount >= DAILY_LIMIT_PER_IP) {
