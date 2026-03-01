@@ -8,10 +8,12 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.net.URLEncoder
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -32,7 +34,7 @@ class SyncGooglePlacesRunner(
     }
 
     companion object {
-        private const val GOOGLE_FIND_PLACE_URL = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
+        private const val PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
         private const val MAX_FAIL_COUNT = 3
         private const val REFRESH_MONTHS = 6L
         private const val API_DELAY_MS = 200L
@@ -110,28 +112,38 @@ class SyncGooglePlacesRunner(
     @Suppress("UNCHECKED_CAST")
     private fun searchGooglePlace(name: String, address: String, lat: Double, lng: Double): GooglePlaceData? {
         return try {
-            val input = URLEncoder.encode("$name $address", "UTF-8")
-            val url = "$GOOGLE_FIND_PLACE_URL" +
-                "?input=$input" +
-                "&inputtype=textquery" +
-                "&locationbias=point:$lat,$lng" +
-                "&fields=place_id,rating,user_ratings_total,name" +
-                "&key=$googleApiKey"
-
-            val response = restTemplate.getForObject(url, Map::class.java)
-            val status = response?.get("status") as? String
-            val candidates = response?.get("candidates") as? List<Map<String, Any>>
-
-            if (status == "OK" && !candidates.isNullOrEmpty()) {
-                val candidate = candidates[0]
-                GooglePlaceData(
-                    placeId = candidate["place_id"] as? String,
-                    rating = (candidate["rating"] as? Number)?.toDouble(),
-                    ratingsTotal = (candidate["user_ratings_total"] as? Number)?.toInt()
+            val headers = HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                set("X-Goog-Api-Key", googleApiKey)
+                set("X-Goog-FieldMask", "places.id,places.rating,places.userRatingCount")
+            }
+            val body = mapOf(
+                "textQuery" to "$name $address",
+                "maxResultCount" to 1,
+                "locationBias" to mapOf(
+                    "circle" to mapOf(
+                        "center" to mapOf("latitude" to lat, "longitude" to lng),
+                        "radius" to 500.0
+                    )
                 )
-            } else null
+            )
+
+            val response = restTemplate.postForObject(
+                PLACES_SEARCH_URL,
+                HttpEntity(body, headers),
+                Map::class.java
+            )
+
+            val places = response?.get("places") as? List<Map<String, Any>>
+            val place = places?.firstOrNull() ?: return null
+
+            GooglePlaceData(
+                placeId = place["id"] as? String,
+                rating = (place["rating"] as? Number)?.toDouble(),
+                ratingsTotal = (place["userRatingCount"] as? Number)?.toInt()
+            )
         } catch (e: Exception) {
-            log.debug("Google Places 검색 실패: ${e.message}")
+            log.warn("Google Places 검색 실패: ${e.message}")
             null
         }
     }
